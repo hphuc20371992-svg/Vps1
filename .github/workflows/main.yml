@@ -12,16 +12,12 @@ jobs:
           lscpu | grep "Model name"
           free -h
           
-      - name: Install Tailscale Standard
+      - name: Install Tailscale Package
         run: |
-          # Gọi trực tiếp script cài đặt chính thức để tự cấu hình kho lưu trữ chuẩn
-          curl -fsSL https://tailscale.com | sh
-          
-          # Khởi động dịch vụ mạng ảo ngầm cho môi trường CI/CD
+          sudo apt-get update
+          sudo apt-get install -y tailscale
           sudo tailscaled --tun=userspace-networking &
           sleep 5
-          
-          # Xác thực tự động kết nối máy chủ ảo về mạng lưới cá nhân
           sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=github-win10-vps
 
       - name: Start Windows 10 Docker
