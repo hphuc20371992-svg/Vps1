@@ -12,15 +12,11 @@ jobs:
           lscpu | grep "Model name"
           free -h
           
-      - name: Install Tailscale Binary
-        run: |
-          wget https://tailscale.com
-          tar xzf tailscale_1.68.2_amd64.tgz
-          sudo cp tailscale_1.68.2_amd64/tailscale /usr/bin/
-          sudo cp tailscale_1.68.2_amd64/tailscaled /usr/bin/
-          sudo tailscaled --tun=userspace-networking &
-          sleep 5
-          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=github-win10-vps
+      - name: Connect Tailscale VPN
+        uses: tailscale/github-action@v2
+        with:
+          authkey: ${{ secrets.TAILSCALE_AUTH_KEY }}
+          hostname: github-win10-vps
 
       - name: Start Windows 10 Docker
         run: |
