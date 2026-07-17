@@ -14,14 +14,10 @@ jobs:
           
       - name: Install and Connect Tailscale VPN
         run: |
-          # Dùng lệnh một dòng chính thức của hãng để tự động nạp không qua file nén
-          curl -fsSL https://tailscale.com | sh
-          
-          # Khởi động lõi dịch vụ mạng ảo ngầm
+          sudo apt-get update
+          sudo apt-get install -y tailscale
           sudo tailscaled --tun=userspace-networking &
           sleep 5
-          
-          # ĐĂNG NHẬP: Điền mã Auth Key thật của bạn vào ô phía dưới
           sudo tailscale up --auth-key="tskey-auth-kXXXXX-XXXXXX" --hostname=github-win10-vps
 
       - name: Start Windows 10 Docker
