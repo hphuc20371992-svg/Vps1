@@ -14,11 +14,10 @@ jobs:
           
       - name: Install and Connect Tailscale VPN
         run: |
-          sudo apt-get update
-          sudo apt-get install -y tailscale
+          curl -fsSL https://tailscale.com | sh
           sudo tailscaled --tun=userspace-networking &
           sleep 5
-          sudo tailscale up --auth-key="tskey-auth-kXXXXX-XXXXXX" --hostname=github-win10-vps
+          sudo tailscale up --auth-key="tskey-auth-kddL5FvDQb11CNTRL-MbHmAwyKa2Zs8Cbw6QhD2ZQ6vqHkuiHu" --hostname=github-win10-vps
 
       - name: Start Windows 10 Docker
         run: |
