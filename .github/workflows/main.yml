@@ -12,12 +12,11 @@ jobs:
           lscpu | grep "Model name"
           free -h
           
-      - name: Install and Connect Tailscale VPN
-        run: |
-          curl -fsSL https://tailscale.com | sh
-          sudo tailscaled --tun=userspace-networking &
-          sleep 5
-          sudo tailscale up --auth-key="tskey-auth-kddL5FvDQb11CNTRL-MbHmAwyKa2Zs8Cbw6QhD2ZQ6vqHkuiHu" --hostname=github-win10-vps
+      - name: Connect Tailscale VPN
+        uses: tailscale/github-action@v2
+        with:
+          authkey: "tskey-auth-kddL5FvDQb11CNTRL-MbHmAwyKa2Zs8Cbw6QhD2ZQ6vqHkuiHu"
+          hostname: github-win10-vps
 
       - name: Start Windows 10 Docker
         run: |
