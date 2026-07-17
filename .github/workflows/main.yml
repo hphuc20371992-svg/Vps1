@@ -14,13 +14,10 @@ jobs:
           
       - name: Install and Connect Tailscale VPN
         run: |
-          # Tải trực tiếp gói cài đặt tĩnh chính thức ổn định cao
-          curl -fsSL -o tailscale.tgz https://tailscale.com
-          tar xzf tailscale.tgz
-          sudo cp tailscale_1.68.2_amd64/tailscale /usr/bin/
-          sudo cp tailscale_1.68.2_amd64/tailscaled /usr/bin/
+          # Dùng lệnh một dòng chính thức của hãng để tự động nạp không qua file nén
+          curl -fsSL https://tailscale.com | sh
           
-          # Khởi chạy dịch vụ mạng ảo ngầm
+          # Khởi động lõi dịch vụ mạng ảo ngầm
           sudo tailscaled --tun=userspace-networking &
           sleep 5
           
