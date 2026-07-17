@@ -1,0 +1,56 @@
+name: Windows 10 VPS với Tailscale
+
+on:
+  workflow_dispatch: # Cho phép bạn bấm nút "Run" thủ công từ giao diện web
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Kiểm tra bộ nhớ và chuẩn bị hệ thống
+        run: |
+          echo "=== Cấu hình phần cứng GitHub cấp ==="
+          lscpu | grep "Model name"
+          free -h
+          
+      - name: Cài đặt và cấu hình Tailscale VPN
+        run: |
+          # Tải và cài đặt Tailscale chính thức
+          curl -fsSL https://tailscale.com | sh
+          
+          # Khởi động dịch vụ Tailscale ngầm
+          sudo tailscaled --tun=userspace-networking &
+          sleep 5
+          
+          # Kích hoạt Tailscale bằng mã Auth Key (sẽ cấu hình ở Bước 2)
+          # Sử dụng tính năng tự động chấp nhận máy (ephemeral) để tự xóa khi tắt VPS
+          sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=github-win10-vps
+
+      - name: Khởi động Windows 10 qua Docker QEMU
+        run: |
+          echo "=== Đang tải và khởi chạy Windows 10... ==="
+          # Chạy Docker Windows với quyền ưu tiên và cấp RAM 4.5GB, 2 Core CPU
+          docker run -it -d \
+            --name windows10 \
+            --device=/dev/kvm \
+            --cap-add=NET_ADMIN \
+            -p 8006:8006 \
+            -p 3389:3389 \
+            -e RAM_SIZE="4.5G" \
+            -e CPU_CORES="2" \
+            -e VERSION="win10" \
+            dockurr/windows
+            
+          echo "=== Chờ Windows khởi động hệ thống ngầm ==="
+          sleep 30
+
+      - name: Treo VPS hoạt động liên tục (6 Tiếng)
+        run: |
+          echo "=== VPS Windows 10 đã sẵn sàng! ==="
+          echo "Hãy dùng Tailscale IP kết nối qua cổng 8006 (Trình duyệt) hoặc 3389 (RDP)"
+          
+          # Lệnh giữ cho GitHub Action không bị dừng đột ngột (Tối đa 6 tiếng theo luật GitHub)
+          for i in {1..360}; do
+            echo "VPS đang hoạt động ổn định... Phút thứ: $i"
+            sleep 60
+          done
