@@ -1,34 +1,26 @@
 name: Windows 10 VPS với Tailscale
 
 on:
-  workflow_dispatch: # Bấm nút chạy thủ công trên giao diện web GitHub
+  workflow_dispatch:
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Kiểm tra cấu hình phần cứng
+      - name: Check Hardware
         run: |
-          echo "=== Thông số cấu hình máy ảo GitHub ==="
           lscpu | grep "Model name"
           free -h
           
-      - name: Cài đặt và cấu hình Tailscale VPN
+      - name: Install Tailscale
         run: |
-          # Đường dẫn script cài đặt chính xác từ trang chủ Tailscale
           curl -fsSL https://tailscale.com | sh
-          
-          # Khởi động dịch vụ mạng ảo Tailscale ngầm
           sudo tailscaled --tun=userspace-networking &
           sleep 5
-          
-          # Đăng nhập tự động qua Auth Key bí mật lấy từ GitHub Secrets
           sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=github-win10-vps
 
-      - name: Khởi động Windows 10 Docker (Cấu hình tài khoản riêng)
+      - name: Start Windows 10 Docker
         run: |
-          echo "=== Đang tải và khởi chạy Windows 10... ==="
-          # Cấu hình container chạy Win 10 có sẵn user hphuc2005 và pass Phuc1993
           docker run -it -d \
             --name windows10 \
             --device=/dev/kvm \
@@ -41,17 +33,11 @@ jobs:
             -e USERNAME="hphuc2005" \
             -e PASSWORD="Phuc1993" \
             dockurr/windows
-            
-          echo "=== Chờ hệ thống khởi động ngầm ==="
           sleep 30
 
-      - name: Duy trì VPS hoạt động liên tục
+      - name: Keep Alive VPS
         run: |
-          echo "=== VPS Windows 10 đã sẵn sàng! ==="
-          echo "Mở Remote Desktop (RDP) trên máy tính rồi nhập IP Tailscale để kết nối."
-          
-          # Vòng lặp duy trì hoạt động trong vòng 6 tiếng liên tục
           for i in {1..360}; do
-            echo "VPS hoạt động bình thường... Phút thứ: $i/360"
+            echo "VPS Status: Running... Minute: $i/360"
             sleep 60
           done
