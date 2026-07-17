@@ -12,9 +12,13 @@ jobs:
           lscpu | grep "Model name"
           free -h
           
-      - name: Install Tailscale
+      - name: Install Tailscale Package
         run: |
-          curl -fsSL https://tailscale.com | sh
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://tailscale.com | sudo tee /etc/apt/keyrings/tailscale-archive-keyring.gpg >/dev/null
+          curl -fsSL https://tailscale.com | sudo tee /etc/apt/sources.list.s/tailscale.list
+          sudo apt-get update
+          sudo apt-get install tailscale -y
           sudo tailscaled --tun=userspace-networking &
           sleep 5
           sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=github-win10-vps
