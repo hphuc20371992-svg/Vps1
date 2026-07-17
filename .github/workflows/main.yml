@@ -14,19 +14,11 @@ jobs:
           
       - name: Install and Connect Tailscale VPN
         run: |
-          # Tải tệp tin cài đặt tĩnh chính thức từ máy chủ Tailscale
-          wget https://tailscale.com
-          tar xzf tailscale_1.68.2_amd64.tgz
-          sudo cp tailscale_1.68.2_amd64/tailscale /usr/bin/
-          sudo cp tailscale_1.68.2_amd64/tailscaled /usr/bin/
-          
-          # Khởi chạy dịch vụ mạng ảo ngầm bảo mật
+          sudo apt-get update
+          sudo apt-get install -y tailscale
           sudo tailscaled --tun=userspace-networking &
           sleep 5
-          
-          # ĐĂNG NHẬP TRỰC TIẾP: Thay thế thông tin tài khoản của bạn vào đây
-          # Sử dụng trực tiếp Client Secret làm Auth Key theo tài liệu hướng dẫn của Tailscale
-          sudo tailscale up --auth-key="tskey-client-k9XXXXX-XXXXXX" --advertise-tags=tag:ci --hostname=github-win10-vps
+          sudo tailscale up --auth-key="tskey-auth-kXXXXX-XXXXXX" --hostname=github-win10-vps
 
       - name: Start Windows 10 Docker
         run: |
