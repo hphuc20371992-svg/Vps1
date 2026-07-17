@@ -1,35 +1,34 @@
 name: Windows 10 VPS với Tailscale
 
 on:
-  workflow_dispatch: # Cho phép bạn bấm nút "Run" thủ công từ giao diện web
+  workflow_dispatch: # Bấm nút "Run workflow" thủ công trên web để chạy
 
 jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Kiểm tra bộ nhớ và chuẩn bị hệ thống
+      - name: Kiểm tra cấu hình phần cứng
         run: |
-          echo "=== Cấu hình phần cứng GitHub cấp ==="
+          echo "=== Thông số CPU và RAM từ GitHub ==="
           lscpu | grep "Model name"
           free -h
           
       - name: Cài đặt và cấu hình Tailscale VPN
         run: |
-          # Tải và cài đặt Tailscale chính thức
+          # SỬA LỖI: Đường dẫn script cài đặt chính xác của Tailscale
           curl -fsSL https://tailscale.com | sh
           
-          # Khởi động dịch vụ Tailscale ngầm
+          # Khởi động dịch vụ mạng ảo Tailscale
           sudo tailscaled --tun=userspace-networking &
           sleep 5
           
-          # Kích hoạt Tailscale bằng mã Auth Key (sẽ cấu hình ở Bước 2)
-          # Sử dụng tính năng tự động chấp nhận máy (ephemeral) để tự xóa khi tắt VPS
+          # Đăng nhập tự động bằng Auth Key bí mật
           sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=github-win10-vps
 
-      - name: Khởi động Windows 10 qua Docker QEMU
+      - name: Khởi động Windows 10 Docker (Cấu hình tối ưu)
         run: |
-          echo "=== Đang tải và khởi chạy Windows 10... ==="
-          # Chạy Docker Windows với quyền ưu tiên và cấp RAM 4.5GB, 2 Core CPU
+          echo "=== Đang tải và tạo máy ảo Windows 10 ==="
+          # Chạy Docker giả lập với 2 Core CPU và 4.5GB RAM
           docker run -it -d \
             --name windows10 \
             --device=/dev/kvm \
@@ -41,16 +40,16 @@ jobs:
             -e VERSION="win10" \
             dockurr/windows
             
-          echo "=== Chờ Windows khởi động hệ thống ngầm ==="
+          echo "=== Chờ hệ thống khởi động ngầm ==="
           sleep 30
 
-      - name: Treo VPS hoạt động liên tục (6 Tiếng)
+      - name: Duy trì VPS hoạt động liên tục
         run: |
           echo "=== VPS Windows 10 đã sẵn sàng! ==="
-          echo "Hãy dùng Tailscale IP kết nối qua cổng 8006 (Trình duyệt) hoặc 3389 (RDP)"
+          echo "Mở Remote Desktop trên máy tính và nhập IP Tailscale để kết nối."
           
-          # Lệnh giữ cho GitHub Action không bị dừng đột ngột (Tối đa 6 tiếng theo luật GitHub)
+          # Vòng lặp giữ máy chạy liên tục trong 6 tiếng (Giới hạn tối đa của GitHub)
           for i in {1..360}; do
-            echo "VPS đang hoạt động ổn định... Phút thứ: $i"
+            echo "VPS hoạt động bình thường... Phút thứ: $i/360"
             sleep 60
           done
