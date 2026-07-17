@@ -12,16 +12,17 @@ jobs:
           lscpu | grep "Model name"
           free -h
           
-      - name: Install Tailscale Automated
+      - name: Install Tailscale Package
         run: |
-          # Tải và chạy trực tiếp tập lệnh cài đặt tự động từ máy chủ chính thức của Tailscale
-          curl -fsSL https://tailscale.com | sh
-          
-          # Khởi động dịch vụ mạng ảo ngầm
+          sudo apt-get update
+          sudo apt-get install -y gpg
+          sudo mkdir -p /etc/apt/keyrings
+          curl -fsSL https://tailscale.com | sudo tee /etc/apt/keyrings/tailscale-archive-keyring.gpg >/dev/null
+          echo "deb [signed-by=/etc/apt/keyrings/tailscale-archive-keyring.gpg] https://tailscale.com jammy main" | sudo tee /etc/apt/sources.list.d/tailscale.list
+          sudo apt-get update
+          sudo apt-get install -y tailscale
           sudo tailscaled --tun=userspace-networking &
           sleep 5
-          
-          # Đăng nhập tự động kết nối mạng mạng lưới thiết bị ảo
           sudo tailscale up --authkey=${{ secrets.TAILSCALE_AUTH_KEY }} --hostname=github-win10-vps
 
       - name: Start Windows 10 Docker
